@@ -7,37 +7,61 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import DetailsIcon from '@material-ui/icons/Details';
 import ReactPaginate from 'react-paginate';
 import ParticipantDetails from "./ParticipantDetails";
-//const viewDetails = 
+//import ParticipantDetails from "./ParticipantDetails";
+
+
 function Participants() {
     const [offset, setOffset] = useState(0);
+    const [details, showDetails] = useState(false);
+
     const [data, setData] = useState([]);
     const [perPage] = useState(10);
     const [pageCount, setPageCount] = useState(0)
+    const [currentEmployee, setCurrentEmployee] = useState(null);
 
+    const [currentIndex, setCurrentIndex] = useState(-1);
 
     const getData = async () => {
         const res = await axios.get(`https://us-central1-veertly-dev-8b81f.cloudfunctions.net/fetchParticipants`)
         const data = res.data;
         const slice = data.slice(offset, offset + perPage)
-        const postData = slice.map(pd => <ListItem key={pd.id} dense button>
-            <ListItem>{pd.firstName}</ListItem>
-            <ListItemText>{pd.jobTitle}</ListItemText>
+
+  
+        
+        const postData = slice.map((participant, index) => <List   className={
+            "list-group-item " + (index === currentIndex ? "active" : "")
+        } key={index} ><ListItem dense button>
+
+        
+            <ListItem>{participant.firstName}</ListItem>
+            <ListItemText>{participant.jobTitle}</ListItemText>
             <ListItemSecondaryAction>
                 <IconButton
                     aria-label="Delete"
+                  
                     onClick={() => {
-                        // viewDetails(pd.id);
+                       // setActiveEmployee( participant.id);
+                        handleDetailsClick(details);
+                        setActiveEmployee(participant, participant.id);
+                       
                     }}>
-                    <ParticipantDetails  details={pd}/>
+                     {currentEmployee ? ( <ParticipantDetails details={currentEmployee} employee={participant} />) : (
+          <div>
+            <br />
+            <p>Please click on a Tutorial...</p>
+          </div>
+        )}
+                    
                     <DetailsIcon />
                 </IconButton>
             </ListItemSecondaryAction>
-        </ListItem>)
+        </ListItem>
+       </List>
+        )
         setData(postData)
         setPageCount(Math.ceil(data.length / perPage))
 
@@ -48,6 +72,42 @@ function Participants() {
         const selectedPage = e.selected;
         setOffset(selectedPage + 1)
     };
+
+    const  handleDetailsClick = (e, details) => {
+        console.log(details)
+        showDetails(!details);
+    
+    };
+
+    const setActiveEmployee = (employee, index) => {
+        setCurrentEmployee(employee);
+        setCurrentIndex(index);
+    };
+    
+
+const Modal = ({ employee }) => (
+    
+    <div >
+    <section className="modal-main">
+      {employee}
+     
+    </section>
+  </div>
+);
+const Modal2 = ({ handleClose, show, employee }) => {
+    const showHideClassName = show ? "modal display-block" : "modal display-none";
+  
+    return (
+      <div className={showHideClassName}>
+        <section className="modal-main">
+          {employee}
+          <button type="button" onClick={handleClose}>
+            Close
+          </button>
+        </section>
+      </div>
+    );
+  };
 
     useEffect(() => {
         getData()

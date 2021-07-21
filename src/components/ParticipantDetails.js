@@ -1,10 +1,29 @@
 import React, { Component } from "react";
+import { useState, useEffect } from 'react';
 
-function ParticipantDetails (props) {
-  
+
+const ParticipantDetails = (props) => {
+    const [visible, setVisible ] = useState(false)
+
+    const initialEmployeeState = {
+        id: null,
+        title: "",
+        description: "",
+        published: false
+      };
+
+    function openModal(){
+        setVisible(props.details)
+    }
+
+
+  function closeModal(){
+    setVisible(false)
+  }
     return (
       <div>
-        <p>{props.details.firstName}</p>
+        <p>{props.employee.firstName}</p>§
+        <button > Dismiss</button>
         
 
          
