@@ -1,22 +1,22 @@
 
-import React, { Component } from "react";
+import React from "react";
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
-import DetailsIcon from '@material-ui/icons/Details';
-import ReactPaginate from 'react-paginate';
-import ParticipantDetails from "./ParticipantDetails";
-//import ParticipantDetails from "./ParticipantDetails";
 
+import ReactPaginate from 'react-paginate';
+
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import Typography from '@material-ui/core/Typography';
 
 function Participants() {
     const [offset, setOffset] = useState(0);
-    const [details, showDetails] = useState(false);
 
     const [data, setData] = useState([]);
     const [perPage] = useState(10);
@@ -27,40 +27,28 @@ function Participants() {
 
     const getData = async () => {
         const res = await axios.get(`https://us-central1-veertly-dev-8b81f.cloudfunctions.net/fetchParticipants`)
-        const data = res.data;
-        const slice = data.slice(offset, offset + perPage)
 
-  
-        
-        const postData = slice.map((participant, index) => <List   className={
-            "list-group-item " + (index === currentIndex ? "active" : "")
-        } key={index} ><ListItem dense button>
 
-        
-            <ListItem>{participant.firstName}</ListItem>
-            <ListItemText>{participant.jobTitle}</ListItemText>
-            <ListItemSecondaryAction>
-                <IconButton
-                    aria-label="Delete"
-                  
-                    onClick={() => {
-                       // setActiveEmployee( participant.id);
-                        handleDetailsClick(details);
-                        setActiveEmployee(participant, participant.id);
-                       
-                    }}>
-                     {currentEmployee ? ( <ParticipantDetails details={currentEmployee} employee={participant} />) : (
-          <div>
-            <br />
-            <p>Please click on a Tutorial...</p>
-          </div>
-        )}
-                    
-                    <DetailsIcon />
-                </IconButton>
-            </ListItemSecondaryAction>
-        </ListItem>
-       </List>
+
+
+        const postData = slice.map((participant, index) =>
+            <List>
+                <ListItem className="list-group">
+                    <ListItemSecondaryAction
+                        className={
+                            "list-group-item " + (index === currentIndex ? "active" : "")
+                        }
+                        key={index}
+
+                        onClick={() => setActiveEmployee(participant, index)}>
+
+                        <ListItemText>{participant.firstName}</ListItemText>
+
+
+                    </ListItemSecondaryAction>
+                </ListItem>
+            </List>
+
         )
         setData(postData)
         setPageCount(Math.ceil(data.length / perPage))
@@ -73,62 +61,117 @@ function Participants() {
         setOffset(selectedPage + 1)
     };
 
-    const  handleDetailsClick = (e, details) => {
-        console.log(details)
-        showDetails(!details);
-    
-    };
 
     const setActiveEmployee = (employee, index) => {
         setCurrentEmployee(employee);
         setCurrentIndex(index);
     };
-    
 
-const Modal = ({ employee }) => (
-    
-    <div >
-    <section className="modal-main">
-      {employee}
-     
-    </section>
-  </div>
-);
-const Modal2 = ({ handleClose, show, employee }) => {
-    const showHideClassName = show ? "modal display-block" : "modal display-none";
-  
-    return (
-      <div className={showHideClassName}>
-        <section className="modal-main">
-          {employee}
-          <button type="button" onClick={handleClose}>
-            Close
-          </button>
-        </section>
-      </div>
-    );
-  };
+
+
 
     useEffect(() => {
         getData()
-    }, [offset])
+    }, [offset]);
 
+    const useStyles = makeStyles({
+        root: {
+            minWidth: 275,
+        },
+        bullet: {
+            display: 'inline-block',
+            margin: '0 2px',
+            transform: 'scale(0.8)',
+        },
+        title: {
+            fontSize: 14,
+        },
+        pos: {
+            marginBottom: 12,
+        },
+    });
+    const classes = useStyles();
     return (
-        <List>
-            {data}
-            <ReactPaginate
-                previousLabel={"prev"}
-                nextLabel={"next"}
-                breakLabel={"..."}
-                breakClassName={"break-me"}
-                pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={handlePageClick}
-                containerClassName={"pagination"}
-                subContainerClassName={"pages pagination"}
-                activeClassName={"active"} />
-        </List>
+        <div>
+            <div className="col-md-6">
+                {currentEmployee ? (
+                    <List>
+                        <Card className={classes.root}>
+                            <h4>Employee Details</h4>
+
+                            <CardContent>
+
+                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                    <strong>FirstName: </strong>
+                                    {currentEmployee.firstName}
+
+
+
+                                </Typography>
+                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                    <strong>LastName: </strong>
+                                    {currentEmployee.lastName}
+
+
+
+                                </Typography>
+                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+
+                                    <strong>Company: </strong>
+                                    {currentEmployee.company}
+
+
+
+                                </Typography>
+                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+
+                                    <strong>Jobn Title: </strong>
+                                    {currentEmployee.jobTitle}
+
+
+
+                                </Typography>
+                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+
+                                    <strong>ID: </strong>
+                                    {currentEmployee.id}
+
+
+                                </Typography>
+
+                            </CardContent>
+
+                        </Card>
+
+
+
+                    </List>
+                ) : (
+                    <div>
+                        <br />
+                        <p>Click on an Employee...</p>
+                    </div>
+                )}
+            </div>
+     
+                <h4>Employee List</h4>
+                {data}
+                <ReactPaginate
+                    previousLabel={"prev"}
+                    nextLabel={"next"}
+                    breakLabel={"..."}
+                    breakClassName={"break-me"}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination"}
+                    subContainerClassName={"pages pagination"}
+                    activeClassName={"active"} />
+            </div>
+
+       
+
     );
 }
 
